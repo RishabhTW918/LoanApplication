@@ -6,23 +6,22 @@ from services.common.config import settings
 
 logger = logging.getLogger(__name__)
 
-class ApplicationKafkaProducer:
 
+class ApplicationKafkaProducer:
 
     def __init__(self):
         self.producer = None
         self._connect()
 
-
     def _connect(self):
         try:
             self.producer = KafkaProducer(
-                bootstrap_servers = settings.kafka_bootstrap_servers,
-                value_serializer = lambda v: json.dumps(v).encode("utf-8"),
-                acks = 'all',
-                retries = 3,
+                bootstrap_servers=settings.kafka_bootstrap_servers,
+                value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+                acks="all",
+                retries=3,
                 max_in_flight_requests_per_connection=1,
-                compression_type='gzip',
+                compression_type="gzip",
             )
             logger.info("Connected to Kafka")
         except Exception as e:
@@ -43,7 +42,7 @@ class ApplicationKafkaProducer:
             future = self.producer.send(
                 settings.kafka_topic_applications_submitted,
                 value=message,
-                key=message["application_id"].encode('utf-8')  # Partition by app ID
+                key=message["application_id"].encode("utf-8"),  # Partition by app ID
             )
 
             record_metadata = future.get(timeout=10)
@@ -64,6 +63,6 @@ class ApplicationKafkaProducer:
             self.producer.close()
             logger.info("Kafka producer closed")
 
+
 # Singleton instance
 kafka_producer = ApplicationKafkaProducer()
-

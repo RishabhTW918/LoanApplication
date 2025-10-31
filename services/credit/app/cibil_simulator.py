@@ -1,9 +1,8 @@
 import random
 import logging
-from typing import Dict
-from decimal import Decimal
 
 logger = logging.getLogger(__name__)
+
 
 class CIBILSimulator:
     """
@@ -19,10 +18,7 @@ class CIBILSimulator:
 
     @classmethod
     def generate_score(
-        cls,
-        pan_number: str,
-        monthly_income_inr: float,
-        loan_type: str
+        cls, pan_number: str, monthly_income_inr: float, loan_type: str
     ) -> int:
         """
         Generate a simulated CIBIL score.

@@ -6,8 +6,7 @@ from services.common.config import settings
 from services.common.kafka_consumer import BaseKafkaConsumer
 
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -18,9 +17,9 @@ class CreditService:
         # Create Kafka producer for publishing credit reports
         self.producer = KafkaProducer(
             bootstrap_servers=settings.kafka_bootstrap_servers,
-            value_serializer=lambda v: json.dumps(v).encode('utf-8'),
-            acks='all',
-            retries=3
+            value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+            acks="all",
+            retries=3,
         )
         logger.info("Credit service initialized")
 
@@ -42,7 +41,7 @@ class CreditService:
             cibil_score = CIBILSimulator.generate_score(
                 pan_number=pan_number,
                 monthly_income_inr=monthly_income,
-                loan_type=loan_type
+                loan_type=loan_type,
             )
 
             score_category = CIBILSimulator.get_score_category(cibil_score)
@@ -60,14 +59,14 @@ class CreditService:
                 "loan_amount_inr": float(message["loan_amount_inr"]),
                 "loan_type": loan_type,
                 "cibil_score": cibil_score,
-                "score_category": score_category
+                "score_category": score_category,
             }
 
             # Publish to credit_reports_generated topic
             future = self.producer.send(
                 settings.kafka_topic_credit_reports_generated,
                 value=credit_report,
-                key=application_id.encode('utf-8')
+                key=application_id.encode("utf-8"),
             )
 
             # Wait for confirmation
@@ -87,7 +86,7 @@ class CreditService:
         consumer = BaseKafkaConsumer(
             topic=settings.kafka_topic_applications_submitted,
             group_id="credit-service-group",
-            message_handler=self.process_application
+            message_handler=self.process_application,
         )
         consumer.start()
 
@@ -95,7 +94,6 @@ class CreditService:
         if self.producer:
             self.producer.close()
             logger.info("Producer closed")
-
 
 
 def main():
@@ -109,6 +107,7 @@ def main():
         logger.info("Credit service interrupted")
     finally:
         service.close()
+
 
 if __name__ == "__main__":
     main()

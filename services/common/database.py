@@ -9,13 +9,14 @@ engine = create_engine(
     pool_size=5,
     max_overflow=10,
     pool_pre_ping=True,  # Test connections before using
-    echo=settings.debug  # Log SQL queries in debug mode
+    echo=settings.debug,  # Log SQL queries in debug mode
 )
 
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
+
 
 def get_db():
     db = SessionLocal()

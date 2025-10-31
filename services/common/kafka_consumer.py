@@ -6,6 +6,7 @@ from .config import settings
 
 logger = logging.getLogger(__name__)
 
+
 class BaseKafkaConsumer:
     """
     Base Kafka consumer with common configuration and error handling.
@@ -24,8 +25,8 @@ class BaseKafkaConsumer:
                 self.topic,
                 bootstrap_servers=settings.kafka_bootstrap_servers,
                 group_id=self.group_id,
-                value_deserializer=lambda m: json.loads(m.decode('utf-8')),
-                auto_offset_reset='earliest',  # Start from beginning if no offset
+                value_deserializer=lambda m: json.loads(m.decode("utf-8")),
+                auto_offset_reset="earliest",  # Start from beginning if no offset
                 enable_auto_commit=False,  # Manual commit for reliability
                 max_poll_records=10,  # Process in small batches
                 session_timeout_ms=30000,
@@ -35,7 +36,6 @@ class BaseKafkaConsumer:
         except Exception as e:
             logger.error(f"Failed to connect consumer: {e}")
             raise
-
 
     def start(self):
         logger.info(f"Starting consumer for topic: {self.topic}")
@@ -53,7 +53,9 @@ class BaseKafkaConsumer:
 
                     # Commit offset after successful processing
                     self.consumer.commit()
-                    logger.info(f"Successfully processed and committed offset {message.offset}")
+                    logger.info(
+                        f"Successfully processed and committed offset {message.offset}"
+                    )
 
                 except Exception as e:
                     logger.error(f"Error processing message: {e}")

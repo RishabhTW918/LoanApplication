@@ -1,8 +1,9 @@
 import logging
-from typing import Dict, Tuple
+from typing import Tuple
 from decimal import Decimal
 
 logger = logging.getLogger(__name__)
+
 
 class DecisionEngine:
     """
@@ -20,10 +21,7 @@ class DecisionEngine:
 
     @classmethod
     def make_decision(
-        cls,
-        cibil_score: int,
-        monthly_income_inr: float,
-        loan_amount_inr: float
+        cls, cibil_score: int, monthly_income_inr: float, loan_amount_inr: float
     ) -> Tuple[str, str]:
         """
         Make a prequalification decision based on business rules.
@@ -54,7 +52,9 @@ class DecisionEngine:
         # Rule 2 & 3: Check income-to-loan ratio
         # Simple EMI calculation: Loan / Tenure
         # In reality, would use EMI formula with interest rate
-        min_monthly_income_required = Decimal(loan_amount_inr) / Decimal(cls.LOAN_TENURE_MONTHS)
+        min_monthly_income_required = Decimal(loan_amount_inr) / Decimal(
+            cls.LOAN_TENURE_MONTHS
+        )
 
         logger.debug(
             f"Minimum income required: {min_monthly_income_required:.2f}, "
@@ -79,10 +79,7 @@ class DecisionEngine:
 
     @classmethod
     def calculate_emi(
-        cls,
-        principal: float,
-        annual_interest_rate: float,
-        tenure_months: int
+        cls, principal: float, annual_interest_rate: float, tenure_months: int
     ) -> float:
         """
         Calculate EMI using the standard formula.
@@ -102,8 +99,8 @@ class DecisionEngine:
             float: Monthly EMI amount
         """
         monthly_rate = annual_interest_rate / 12 / 100
-        emi = (
-            principal * monthly_rate * (1 + monthly_rate) ** tenure_months
-        ) / ((1 + monthly_rate) ** tenure_months - 1)
+        emi = (principal * monthly_rate * (1 + monthly_rate) ** tenure_months) / (
+            (1 + monthly_rate) ** tenure_months - 1
+        )
 
         return round(emi, 2)

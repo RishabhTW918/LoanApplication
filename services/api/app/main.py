@@ -3,21 +3,20 @@ from sqlalchemy.orm import Session
 from typing import Dict
 import logging
 from uuid import UUID
-from services.common.database import get_db,engine,Base
+from services.common.database import get_db, engine, Base
 from services.common.models import LoanApplication
 from .schemas import (
     ApplicationCreate,
     ApplicationResponse,
     ApplicationStatusResponse,
-    ErrorResponse
+    ErrorResponse,
 )
 from .kafka_producer import kafka_producer
 from services.common.config import settings
 
 
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -26,8 +25,9 @@ app = FastAPI(
     description="Loan Prequalification Service API",
     version="1.0.0",
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
 )
+
 
 # Create database tables on startup
 @app.on_event("startup")
@@ -36,18 +36,17 @@ async def startup_event():
     Base.metadata.create_all(bind=engine)
     logger.info("Database tables created/verified")
 
+
 @app.on_event("shutdown")
 async def shutdown_event():
     logger.info("Shutting down API service...")
     kafka_producer.close()
 
+
 @app.get("/", tags=["Health"])
 async def root():
-    return {
-        "service": settings.app_name,
-        "status": "healthy",
-        "version": "1.0.0"
-    }
+    return {"service": settings.app_name, "status": "healthy", "version": "1.0.0"}
+
 
 @app.post(
     "/application",
@@ -56,13 +55,12 @@ async def root():
     responses={
         202: {"description": "Application accepted and queued for processing"},
         422: {"model": ErrorResponse, "description": "Validation error"},
-        500: {"model": ErrorResponse, "description": "Internal server error"}
+        500: {"model": ErrorResponse, "description": "Internal server error"},
     },
-    tags=["Applications"]
+    tags=["Applications"],
 )
 async def submit_application(
-    application: ApplicationCreate,
-    db: Session = Depends(get_db)
+    application: ApplicationCreate, db: Session = Depends(get_db)
 ):
     """
     Submit a new loan prequalification application.
@@ -79,9 +77,6 @@ async def submit_application(
 
     Returns:
         ApplicationResponse with application_id and status
-
-    Raises:
-        HTTPException: If validation fails or system error occurs
     """
     try:
         # Create database record
@@ -91,7 +86,7 @@ async def submit_application(
             monthly_income_inr=application.monthly_income_inr,
             loan_amount_inr=application.loan_amount_inr,
             loan_type=application.loan_type.value,
-            status="PENDING"
+            status="PENDING",
         )
 
         db.add(db_application)
@@ -107,7 +102,7 @@ async def submit_application(
             "applicant_name": db_application.applicant_name,
             "monthly_income_inr": db_application.monthly_income_inr,
             "loan_amount_inr": db_application.loan_amount_inr,
-            "loan_type": db_application.loan_type
+            "loan_type": db_application.loan_type,
         }
 
         # Publish to Kafka
@@ -119,8 +114,7 @@ async def submit_application(
             # The application is still in PENDING state and can be retried
 
         return ApplicationResponse(
-            application_id=db_application.id,
-            status = db_application.status
+            application_id=db_application.id, status=db_application.status
         )
 
     except Exception as e:
@@ -128,21 +122,22 @@ async def submit_application(
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to process application. Please try again later."
+            detail="Failed to process application. Please try again later.",
         )
+
+
 #
 @app.get(
     "/applications/{application_id}/status",
     response_model=ApplicationStatusResponse,
     responses={
         200: {"description": "Application status retrieved successfully"},
-        404: {"model": ErrorResponse, "description": "Application not found"}
+        404: {"model": ErrorResponse, "description": "Application not found"},
     },
-    tags=["Applications"]
+    tags=["Applications"],
 )
 async def get_application_status(
-    application_id: UUID,
-    db: Session = Depends(get_db)
+    application_id: UUID, db: Session = Depends(get_db)
 ) -> Dict:
     """
     Get the current status of a loan application.
@@ -153,14 +148,16 @@ async def get_application_status(
         ApplicationStatusResponse with current status and details
     """
     try:
-        application = db.query(LoanApplication).filter(
-            LoanApplication.id == application_id
-        ).first()
+        application = (
+            db.query(LoanApplication)
+            .filter(LoanApplication.id == application_id)
+            .first()
+        )
 
         if not application:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Application {application_id} not found"
+                detail=f"Application {application_id} not found",
             )
 
         return ApplicationStatusResponse(
@@ -168,7 +165,7 @@ async def get_application_status(
             status=application.status,
             cibil_score=application.cibil_score,
             created_at=application.created_at,
-            updated_at=application.updated_at
+            updated_at=application.updated_at,
         )
 
     except HTTPException:
@@ -177,8 +174,9 @@ async def get_application_status(
         logger.error(f"Error retrieving application status: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve application status"
+            detail="Failed to retrieve application status",
         )
+
 
 # # Additional utility endpoints for testing/debugging
 #
