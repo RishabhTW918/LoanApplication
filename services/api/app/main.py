@@ -3,16 +3,16 @@ from sqlalchemy.orm import Session
 from typing import Dict
 import logging
 from uuid import UUID
-from database import get_db,engine,Base
-from models import LoanApplication
-from schemas import (
+from services.common.database import get_db,engine,Base
+from services.common.models import LoanApplication
+from .schemas import (
     ApplicationCreate,
     ApplicationResponse,
     ApplicationStatusResponse,
     ErrorResponse
 )
-from kafka_producer import kafka_producer
-from config import settings
+from .kafka_producer import kafka_producer
+from services.common.config import settings
 
 
 logging.basicConfig(
@@ -38,7 +38,6 @@ async def startup_event():
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    """Clean up resources."""
     logger.info("Shutting down API service...")
     kafka_producer.close()
 

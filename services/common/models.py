@@ -2,7 +2,7 @@ from sqlalchemy import Column, String, DECIMAL, Integer, TIMESTAMP, CheckConstra
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from datetime import datetime, timezone
-from database import Base
+from .database import Base
 
 class LoanApplication(Base):
     __tablename__ = "applications"

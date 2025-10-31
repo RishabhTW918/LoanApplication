@@ -2,7 +2,7 @@ from kafka import KafkaConsumer
 import json
 import logging
 from typing import Callable
-from config import settings
+from .config import settings
 
 logger = logging.getLogger(__name__)
 

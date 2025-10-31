@@ -1,11 +1,10 @@
 import logging
 import json
 from kafka import KafkaProducer
-from cibil_simulator import CIBILSimulator
-from config import settings
-from kafka_consumer import BaseKafkaConsumer
+from .cibil_simulator import CIBILSimulator
+from services.common.config import settings
+from services.common.kafka_consumer import BaseKafkaConsumer
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -28,7 +27,6 @@ class CreditService:
     def process_application(self, message: dict):
         """
         Process a loan application and generate CIBIL score.
-
         Args:
             message: Application data from Kafka
         """
@@ -94,7 +92,6 @@ class CreditService:
         consumer.start()
 
     def close(self):
-        """Clean up resources."""
         if self.producer:
             self.producer.close()
             logger.info("Producer closed")
