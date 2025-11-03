@@ -161,3 +161,18 @@
 
   # All services
   docker-compose ps
+
+   # Access the PostgreSQL container
+  docker exec -it loan_prequal_db psql -U postgres -d loan_prequal
+
+  # Once inside psql, run these commands:
+  \dt              # List all tables
+  \d applications  # Describe the applications table structure
+  \d+ applications # Detailed table info with size
+
+  # View data
+  SELECT * FROM applications;
+  SELECT COUNT(*) FROM applications;
+
+  # Exit psql
+  \q
