@@ -3,8 +3,8 @@ from sqlalchemy.orm import Session
 from typing import Dict
 import logging
 from uuid import UUID
-from services.common.database import get_db, engine, Base
-from services.common.models import LoanApplication
+from LoanApplication.services.common.database import get_db, engine, Base
+from LoanApplication.services.common.models import LoanApplication
 from .schemas import (
     ApplicationCreate,
     ApplicationResponse,
@@ -12,7 +12,7 @@ from .schemas import (
     ErrorResponse,
 )
 from .kafka_producer import kafka_producer
-from services.common.config import settings
+from LoanApplication.services.common.config import settings
 
 
 logging.basicConfig(
