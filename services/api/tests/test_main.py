@@ -1,29 +1,18 @@
-# LoanApplication/services/api/tests/test_decision.py
-
-# --- stub kafka before importing app ---
-import sys, types
-mod = types.ModuleType("LoanApplication.services.api.app.kafka_producer")
-mod.kafka_producer = types.SimpleNamespace(
-    publish_application_submitted=lambda *a, **k: True
-)
-sys.modules["LoanApplication.services.api.app.kafka_producer"] = mod
-# --- end stub ---
-
 import unittest
 from fastapi.testclient import TestClient
-from LoanApplication.services.api.app.main import app, settings
+from services.api.app.main import app, settings
 from fastapi import status
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
-from LoanApplication.services.common.database import Base, get_db
-from LoanApplication.services.common.models import LoanApplication
+from services.common.database import Base, get_db
+from services.common.models import LoanApplication
 from decimal import Decimal
 from uuid import uuid4
 
 
-
 client = TestClient(app)
+
 
 class TestHealthEndpoint(unittest.TestCase):
     def test_root_health_ok_exact_service(self):
@@ -37,6 +26,8 @@ class TestHealthEndpoint(unittest.TestCase):
                 "version": "1.0.0",
             },
         )
+
+
 class TestApplicationEndpoint(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -92,15 +83,19 @@ class TestApplicationEndpoint(unittest.TestCase):
 
         # Schemas wired correctly
         ok202_schema = responses["202"]["content"]["application/json"]["schema"]
-        self.assertTrue(ok202_schema.get("$ref", "").endswith(
-            "#/components/schemas/ApplicationResponse"
-        ))
+        self.assertTrue(
+            ok202_schema.get("$ref", "").endswith(
+                "#/components/schemas/ApplicationResponse"
+            )
+        )
 
         for code in ("422", "500"):
             err_schema = responses[code]["content"]["application/json"]["schema"]
-            self.assertTrue(err_schema.get("$ref", "").endswith(
-                "#/components/schemas/ErrorResponse"
-            ))
+            self.assertTrue(
+                err_schema.get("$ref", "").endswith(
+                    "#/components/schemas/ErrorResponse"
+                )
+            )
 
     def test_submit_valid_application_returns_202(self):
         """Happy path: should return 202 and ApplicationResponse shape."""
@@ -141,7 +136,9 @@ class TestApplicationEndpoint(unittest.TestCase):
         data = resp.json()
         self.assertIn("detail", data)
         # at least verify the error points at pan_number
-        self.assertTrue(any(it.get("loc", [])[-1] == "pan_number" for it in data["detail"]))
+        self.assertTrue(
+            any(it.get("loc", [])[-1] == "pan_number" for it in data["detail"])
+        )
 
     def test_openapi_contract_for_application_status(self):
         """Verify /applications/{id}/status contract (tags, responses, schemas)."""
@@ -161,18 +158,24 @@ class TestApplicationEndpoint(unittest.TestCase):
 
         # Schemas wired correctly
         ok200_schema = responses["200"]["content"]["application/json"]["schema"]
-        self.assertTrue(ok200_schema.get("$ref", "").endswith(
-            "#/components/schemas/ApplicationStatusResponse"
-        ))
+        self.assertTrue(
+            ok200_schema.get("$ref", "").endswith(
+                "#/components/schemas/ApplicationStatusResponse"
+            )
+        )
         err404_schema = responses["404"]["content"]["application/json"]["schema"]
-        self.assertTrue(err404_schema.get("$ref", "").endswith(
-            "#/components/schemas/ErrorResponse"
-        ))
+        self.assertTrue(
+            err404_schema.get("$ref", "").endswith("#/components/schemas/ErrorResponse")
+        )
 
     def test_get_existing_application_status_returns_200(self):
         """Create an application in DB and fetch its status."""
         app_id = uuid4()
-        db = self.TestingSessionSessionLocal() if hasattr(self, "TestingSessionSessionLocal") else self.TestingSessionLocal()
+        db = (
+            self.TestingSessionSessionLocal()
+            if hasattr(self, "TestingSessionSessionLocal")
+            else self.TestingSessionLocal()
+        )
         try:
             db_app = LoanApplication(
                 id=app_id,
@@ -204,5 +207,3 @@ class TestApplicationEndpoint(unittest.TestCase):
         detail = resp.json().get("detail", "")
         # allow either full message or just the UUID presence
         self.assertIn(str(fake_id).lower(), detail.lower())
-
-

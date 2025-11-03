@@ -2,7 +2,7 @@ from kafka import KafkaProducer
 import json
 import logging
 from typing import Dict, Any
-from LoanApplication.services.common.config import settings
+from services.common.config import settings
 
 logger = logging.getLogger(__name__)
 

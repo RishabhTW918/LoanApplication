@@ -1,5 +1,4 @@
 import unittest
-import pytest
 from unittest.mock import patch
 from ..app.cibil_simulator import CIBILSimulator
 
@@ -17,11 +16,11 @@ class TestCIBILSimulator(unittest.TestCase):
         """Test score generation with high income and personal loan."""
         # High income (+40), Personal loan (-10), Base (650)
         # Expected range with random: 650 + 40 - 10 + (-5 to +5) = 675-685
-        with patch('random.randint', return_value=0):
+        with patch("random.randint", return_value=0):
             score = CIBILSimulator.generate_score(
                 pan_number=self.SAMPLE_PAN,
                 monthly_income_inr=self.HIGH_INCOME,
-                loan_type="PERSONAL"
+                loan_type="PERSONAL",
             )
 
             assert score == 680  # 650 + 40 - 10 + 0
@@ -31,11 +30,11 @@ class TestCIBILSimulator(unittest.TestCase):
         """Test score generation with high income and home loan."""
         # High income (+40), Home loan (+10), Base (650)
         # Expected: 650 + 40 + 10 = 700 (without random)
-        with patch('random.randint', return_value=0):
+        with patch("random.randint", return_value=0):
             score = CIBILSimulator.generate_score(
                 pan_number=self.SAMPLE_PAN,
                 monthly_income_inr=self.HIGH_INCOME,
-                loan_type="HOME"
+                loan_type="HOME",
             )
 
             assert score == 700  # 650 + 40 + 10 + 0
@@ -44,11 +43,11 @@ class TestCIBILSimulator(unittest.TestCase):
         """Test score generation with high income and auto loan (neutral)."""
         # High income (+40), Auto loan (0), Base (650)
         # Expected: 650 + 40 = 690 (without random)
-        with patch('random.randint', return_value=0):
+        with patch("random.randint", return_value=0):
             score = CIBILSimulator.generate_score(
                 pan_number=self.SAMPLE_PAN,
                 monthly_income_inr=self.HIGH_INCOME,
-                loan_type="AUTO"
+                loan_type="AUTO",
             )
 
             assert score == 690  # 650 + 40 + 0
@@ -57,11 +56,11 @@ class TestCIBILSimulator(unittest.TestCase):
         """Test score generation with low income and personal loan."""
         # Low income (-20), Personal loan (-10), Base (650)
         # Expected: 650 - 20 - 10 = 620 (without random)
-        with patch('random.randint', return_value=0):
+        with patch("random.randint", return_value=0):
             score = CIBILSimulator.generate_score(
                 pan_number=self.SAMPLE_PAN,
                 monthly_income_inr=self.LOW_INCOME,
-                loan_type="PERSONAL"
+                loan_type="PERSONAL",
             )
 
             assert score == 620  # 650 - 20 - 10 + 0
@@ -70,11 +69,11 @@ class TestCIBILSimulator(unittest.TestCase):
         """Test score generation with low income and home loan."""
         # Low income (-20), Home loan (+10), Base (650)
         # Expected: 650 - 20 + 10 = 640 (without random)
-        with patch('random.randint', return_value=0):
+        with patch("random.randint", return_value=0):
             score = CIBILSimulator.generate_score(
                 pan_number=self.SAMPLE_PAN,
                 monthly_income_inr=self.LOW_INCOME,
-                loan_type="HOME"
+                loan_type="HOME",
             )
 
             assert score == 640  # 650 - 20 + 10 + 0
@@ -83,11 +82,11 @@ class TestCIBILSimulator(unittest.TestCase):
         """Test score generation with medium income (no adjustments)."""
         # Medium income (0), Auto loan (0), Base (650)
         # Expected: 650 (without random)
-        with patch('random.randint', return_value=0):
+        with patch("random.randint", return_value=0):
             score = CIBILSimulator.generate_score(
                 pan_number=self.SAMPLE_PAN,
                 monthly_income_inr=self.MEDIUM_INCOME,
-                loan_type="AUTO"
+                loan_type="AUTO",
             )
 
             assert score == 650  # Base score only
@@ -95,11 +94,11 @@ class TestCIBILSimulator(unittest.TestCase):
     def test_generate_score_random_variation_positive(self):
         """Test that positive random variation is applied correctly."""
         # Base (650), High income (+40), Auto loan (0), Random (+5)
-        with patch('random.randint', return_value=5):
+        with patch("random.randint", return_value=5):
             score = CIBILSimulator.generate_score(
                 pan_number=self.SAMPLE_PAN,
                 monthly_income_inr=self.HIGH_INCOME,
-                loan_type="AUTO"
+                loan_type="AUTO",
             )
 
             assert score == 695  # 650 + 40 + 0 + 5
@@ -107,11 +106,11 @@ class TestCIBILSimulator(unittest.TestCase):
     def test_generate_score_random_variation_negative(self):
         """Test that negative random variation is applied correctly."""
         # Base (650), High income (+40), Auto loan (0), Random (-5)
-        with patch('random.randint', return_value=-5):
+        with patch("random.randint", return_value=-5):
             score = CIBILSimulator.generate_score(
                 pan_number=self.SAMPLE_PAN,
                 monthly_income_inr=self.HIGH_INCOME,
-                loan_type="AUTO"
+                loan_type="AUTO",
             )
 
             assert score == 685  # 650 + 40 + 0 - 5
@@ -121,12 +120,12 @@ class TestCIBILSimulator(unittest.TestCase):
         # Create scenario that would exceed 900
         # High income (+40), Home loan (+10), Max random (+5) = 650 + 40 + 10 + 5 = 705
         # This won't exceed 900, so let's test with extreme values
-        with patch('random.randint', return_value=5):
-            with patch.object(CIBILSimulator, 'BASE_SCORE', 890):
+        with patch("random.randint", return_value=5):
+            with patch.object(CIBILSimulator, "BASE_SCORE", 890):
                 score = CIBILSimulator.generate_score(
                     pan_number=self.SAMPLE_PAN,
                     monthly_income_inr=self.HIGH_INCOME,
-                    loan_type="HOME"
+                    loan_type="HOME",
                 )
 
                 # 890 + 40 + 10 + 5 = 945, should be capped at 900
@@ -135,12 +134,12 @@ class TestCIBILSimulator(unittest.TestCase):
     def test_generate_score_lower_bound_enforcement(self):
         """Test that score cannot go below MIN_SCORE (300)."""
         # Create scenario that would go below 300
-        with patch('random.randint', return_value=-5):
-            with patch.object(CIBILSimulator, 'BASE_SCORE', 310):
+        with patch("random.randint", return_value=-5):
+            with patch.object(CIBILSimulator, "BASE_SCORE", 310):
                 score = CIBILSimulator.generate_score(
                     pan_number=self.SAMPLE_PAN,
                     monthly_income_inr=self.LOW_INCOME,
-                    loan_type="PERSONAL"
+                    loan_type="PERSONAL",
                 )
 
                 # 310 - 20 - 10 - 5 = 275, should be capped at 300
@@ -149,40 +148,32 @@ class TestCIBILSimulator(unittest.TestCase):
     def test_generate_score_income_threshold_75000(self):
         """Test income adjustment at 75000 threshold."""
         # Just above threshold (should get +40)
-        with patch('random.randint', return_value=0):
+        with patch("random.randint", return_value=0):
             score_above = CIBILSimulator.generate_score(
-                pan_number=self.SAMPLE_PAN,
-                monthly_income_inr=75001,
-                loan_type="AUTO"
+                pan_number=self.SAMPLE_PAN, monthly_income_inr=75001, loan_type="AUTO"
             )
             assert score_above == 690  # 650 + 40
 
         # Just at threshold (should not get +40)
-        with patch('random.randint', return_value=0):
+        with patch("random.randint", return_value=0):
             score_at = CIBILSimulator.generate_score(
-                pan_number=self.SAMPLE_PAN,
-                monthly_income_inr=75000,
-                loan_type="AUTO"
+                pan_number=self.SAMPLE_PAN, monthly_income_inr=75000, loan_type="AUTO"
             )
             assert score_at == 650  # Base only
 
     def test_generate_score_income_threshold_30000(self):
         """Test income adjustment at 30000 threshold."""
         # Just below threshold (should get -20)
-        with patch('random.randint', return_value=0):
+        with patch("random.randint", return_value=0):
             score_below = CIBILSimulator.generate_score(
-                pan_number=self.SAMPLE_PAN,
-                monthly_income_inr=29999,
-                loan_type="AUTO"
+                pan_number=self.SAMPLE_PAN, monthly_income_inr=29999, loan_type="AUTO"
             )
             assert score_below == 630  # 650 - 20
 
         # Just at threshold (should not get -20)
-        with patch('random.randint', return_value=0):
+        with patch("random.randint", return_value=0):
             score_at = CIBILSimulator.generate_score(
-                pan_number=self.SAMPLE_PAN,
-                monthly_income_inr=30000,
-                loan_type="AUTO"
+                pan_number=self.SAMPLE_PAN, monthly_income_inr=30000, loan_type="AUTO"
             )
             assert score_at == 650  # Base only
 
@@ -192,7 +183,7 @@ class TestCIBILSimulator(unittest.TestCase):
         score = CIBILSimulator.generate_score(
             pan_number=self.SAMPLE_PAN,
             monthly_income_inr=self.HIGH_INCOME,
-            loan_type="AUTO"
+            loan_type="AUTO",
         )
 
         # High income (+40), Auto (0), Random (-5 to +5)
@@ -202,11 +193,11 @@ class TestCIBILSimulator(unittest.TestCase):
 
     def test_generate_score_returns_integer(self):
         """Test that generate_score always returns an integer."""
-        with patch('random.randint', return_value=0):
+        with patch("random.randint", return_value=0):
             score = CIBILSimulator.generate_score(
                 pan_number=self.SAMPLE_PAN,
                 monthly_income_inr=self.MEDIUM_INCOME,
-                loan_type="PERSONAL"
+                loan_type="PERSONAL",
             )
 
             assert isinstance(score, int)
@@ -264,7 +255,7 @@ class TestCIBILSimulator(unittest.TestCase):
 
     def test_generate_score_all_loan_types(self):
         """Test score generation with all valid loan types."""
-        with patch('random.randint', return_value=0):
+        with patch("random.randint", return_value=0):
             # Test all three loan types
             personal_score = CIBILSimulator.generate_score(
                 self.SAMPLE_PAN, self.MEDIUM_INCOME, "PERSONAL"
@@ -278,23 +269,19 @@ class TestCIBILSimulator(unittest.TestCase):
 
             # Verify relative differences
             assert personal_score == 640  # 650 - 10
-            assert home_score == 660      # 650 + 10
-            assert auto_score == 650      # 650 (no change)
+            assert home_score == 660  # 650 + 10
+            assert auto_score == 650  # 650 (no change)
 
             # Home loan should have highest score, personal lowest
             assert home_score > auto_score > personal_score
 
     def test_generate_score_extreme_income_values(self):
         """Test score generation with extreme income values."""
-        with patch('random.randint', return_value=0):
+        with patch("random.randint", return_value=0):
             # Very high income
-            high_score = CIBILSimulator.generate_score(
-                self.SAMPLE_PAN, 1000000, "AUTO"
-            )
+            high_score = CIBILSimulator.generate_score(self.SAMPLE_PAN, 1000000, "AUTO")
             assert high_score == 690  # 650 + 40
 
             # Very low income
-            low_score = CIBILSimulator.generate_score(
-                self.SAMPLE_PAN, 5000, "AUTO"
-            )
+            low_score = CIBILSimulator.generate_score(self.SAMPLE_PAN, 5000, "AUTO")
             assert low_score == 630  # 650 - 20

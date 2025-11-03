@@ -1,0 +1,155 @@
+version: "3.8"
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: loan_prequal_db
+    environment:
+      POSTGRES_DB: loan_prequal
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - loan_prequal_network
+
+  # Zookeeper (required for Kafka)
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "localhost", "2181" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - loan_prequal_network
+
+    # Kafka Message Broker
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_LOG_RETENTION_BYTES: 1073741824
+    ports:
+      - "29092:29092"
+      - "9092:9092"
+    healthcheck:
+      test: [ "CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    networks:
+      - loan_prequal_network
+
+  # Kafka UI (optional, for monitoring)
+  kafka-ui:
+      image: provectuslabs/kafka-ui:latest
+      container_name: kafka-ui
+      depends_on:
+        - kafka
+      environment:
+        KAFKA_CLUSTERS_0_NAME: local
+        KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+        KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+      ports:
+        - "8080:8080"
+      networks:
+        - loan_prequal_network
+
+# API Service
+  api:
+    build:
+      context: ./services
+      dockerfile: api/Dockerfile
+    container_name: prequal_api
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/loan_prequal
+      KAFKA_BOOTSTRAP_SERVERS: '["kafka:9092"]'
+      KAFKA_TOPIC_APPLICATIONS_SUBMITTED: loan_applications_submitted
+      DEBUG: "false"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./services/api/app:/app/app  # For development hot-reload
+    networks:
+      - loan_prequal_network
+    restart: unless-stopped
+
+# Credit Service
+  credit:
+    build:
+      context: ./services
+      dockerfile: credit/Dockerfile
+    container_name: credit_service
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: '["kafka:9092"]'
+      KAFKA_TOPIC_APPLICATIONS_SUBMITTED: loan_applications_submitted
+      KAFKA_TOPIC_CREDIT_REPORTS_GENERATED: credit_reports_generated
+      DEBUG: "false"
+    volumes:
+      - ./services/credit/app:/app/app
+    networks:
+      - loan_prequal_network
+    restart: unless-stopped
+# Decision Service
+  decision:
+    build:
+      context: ./services
+      dockerfile: decision/Dockerfile
+    container_name: decision_service
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/loan_prequal
+      KAFKA_BOOTSTRAP_SERVERS: '["kafka:9092"]'
+      KAFKA_TOPIC_CREDIT_REPORTS_GENERATED: credit_reports_generated
+      DEBUG: "false"
+    volumes:
+      - ./services/decision/app:/app/app
+    networks:
+      - loan_prequal_network
+    restart: unless-stopped
+
+networks:
+  loan_prequal_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local

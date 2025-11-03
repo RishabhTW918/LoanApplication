@@ -19,7 +19,7 @@ class TestDecisionEngine(unittest.TestCase):
         status, reason = DecisionEngine.make_decision(
             cibil_score=649,
             monthly_income_inr=self.SUFFICIENT_INCOME,
-            loan_amount_inr=self.LOAN_AMOUNT_480K
+            loan_amount_inr=self.LOAN_AMOUNT_480K,
         )
 
         assert status == DecisionEngine.STATUS_REJECTED
@@ -32,7 +32,7 @@ class TestDecisionEngine(unittest.TestCase):
         status, reason = DecisionEngine.make_decision(
             cibil_score=300,
             monthly_income_inr=self.SUFFICIENT_INCOME,
-            loan_amount_inr=self.LOAN_AMOUNT_480K
+            loan_amount_inr=self.LOAN_AMOUNT_480K,
         )
 
         assert status == DecisionEngine.STATUS_REJECTED
@@ -43,7 +43,7 @@ class TestDecisionEngine(unittest.TestCase):
         status, reason = DecisionEngine.make_decision(
             cibil_score=750,
             monthly_income_inr=50000,  # 50K income for 480K loan (requires 10K)
-            loan_amount_inr=self.LOAN_AMOUNT_480K
+            loan_amount_inr=self.LOAN_AMOUNT_480K,
         )
 
         assert status == DecisionEngine.STATUS_PRE_APPROVED
@@ -55,7 +55,7 @@ class TestDecisionEngine(unittest.TestCase):
         status, reason = DecisionEngine.make_decision(
             cibil_score=650,
             monthly_income_inr=50000,
-            loan_amount_inr=self.LOAN_AMOUNT_480K
+            loan_amount_inr=self.LOAN_AMOUNT_480K,
         )
 
         assert status == DecisionEngine.STATUS_PRE_APPROVED
@@ -66,7 +66,7 @@ class TestDecisionEngine(unittest.TestCase):
         status, reason = DecisionEngine.make_decision(
             cibil_score=850,
             monthly_income_inr=100000,
-            loan_amount_inr=self.LOAN_AMOUNT_1M
+            loan_amount_inr=self.LOAN_AMOUNT_1M,
         )
 
         assert status == DecisionEngine.STATUS_PRE_APPROVED
@@ -76,7 +76,7 @@ class TestDecisionEngine(unittest.TestCase):
         status, reason = DecisionEngine.make_decision(
             cibil_score=750,
             monthly_income_inr=10000,  # 10K income for 480K loan (requires >10K)
-            loan_amount_inr=self.LOAN_AMOUNT_480K
+            loan_amount_inr=self.LOAN_AMOUNT_480K,
         )
 
         assert status == DecisionEngine.STATUS_MANUAL_REVIEW
@@ -90,7 +90,7 @@ class TestDecisionEngine(unittest.TestCase):
         status, reason = DecisionEngine.make_decision(
             cibil_score=700,
             monthly_income_inr=10000.0,  # Exactly at threshold
-            loan_amount_inr=480000
+            loan_amount_inr=480000,
         )
 
         assert status == DecisionEngine.STATUS_MANUAL_REVIEW
@@ -100,7 +100,7 @@ class TestDecisionEngine(unittest.TestCase):
         status, reason = DecisionEngine.make_decision(
             cibil_score=750,
             monthly_income_inr=20833,  # Just below 20833.34 required for 1M loan
-            loan_amount_inr=self.LOAN_AMOUNT_1M
+            loan_amount_inr=self.LOAN_AMOUNT_1M,
         )
 
         assert status == DecisionEngine.STATUS_MANUAL_REVIEW
@@ -111,18 +111,14 @@ class TestDecisionEngine(unittest.TestCase):
         # For a 960000 loan, minimum required income = 960000/48 = 20000
         # Income of 20001 should be sufficient
         status, _ = DecisionEngine.make_decision(
-            cibil_score=700,
-            monthly_income_inr=20001,
-            loan_amount_inr=960000
+            cibil_score=700, monthly_income_inr=20001, loan_amount_inr=960000
         )
 
         assert status == DecisionEngine.STATUS_PRE_APPROVED
 
         # Income of 20000 should be insufficient (not > 20000)
         status, _ = DecisionEngine.make_decision(
-            cibil_score=700,
-            monthly_income_inr=20000,
-            loan_amount_inr=960000
+            cibil_score=700, monthly_income_inr=20000, loan_amount_inr=960000
         )
 
         assert status == DecisionEngine.STATUS_MANUAL_REVIEW
@@ -132,7 +128,7 @@ class TestDecisionEngine(unittest.TestCase):
         status, reason = DecisionEngine.make_decision(
             cibil_score=700,
             monthly_income_inr=5000,  # 5K income for 10K loan (requires >208.33)
-            loan_amount_inr=10000
+            loan_amount_inr=10000,
         )
 
         assert status == DecisionEngine.STATUS_PRE_APPROVED
@@ -142,7 +138,7 @@ class TestDecisionEngine(unittest.TestCase):
         status, reason = DecisionEngine.make_decision(
             cibil_score=800,
             monthly_income_inr=300000,  # 300K income for 10M loan (requires >208333)
-            loan_amount_inr=10000000
+            loan_amount_inr=10000000,
         )
 
         assert status == DecisionEngine.STATUS_PRE_APPROVED
@@ -151,9 +147,7 @@ class TestDecisionEngine(unittest.TestCase):
         """Test EMI calculation for a standard loan."""
         # Loan: 1,000,000, Interest: 12% annual, Tenure: 48 months
         emi = DecisionEngine.calculate_emi(
-            principal=1000000,
-            annual_interest_rate=12,
-            tenure_months=48
+            principal=1000000, annual_interest_rate=12, tenure_months=48
         )
 
         # Expected EMI ≈ 26333.60 (calculated using standard EMI formula)
@@ -172,17 +166,13 @@ class TestDecisionEngine(unittest.TestCase):
         """
         with pytest.raises(ZeroDivisionError):
             DecisionEngine.calculate_emi(
-                principal=480000,
-                annual_interest_rate=0,
-                tenure_months=48
+                principal=480000, annual_interest_rate=0, tenure_months=48
             )
 
     def test_calculate_emi_high_interest_rate(self):
         """Test EMI calculation with high interest rate (24%)."""
         emi = DecisionEngine.calculate_emi(
-            principal=500000,
-            annual_interest_rate=24,
-            tenure_months=36
+            principal=500000, annual_interest_rate=24, tenure_months=36
         )
 
         # EMI should be significantly higher than principal/tenure
@@ -193,9 +183,7 @@ class TestDecisionEngine(unittest.TestCase):
     def test_calculate_emi_short_tenure(self):
         """Test EMI calculation with short tenure (12 months)."""
         emi = DecisionEngine.calculate_emi(
-            principal=100000,
-            annual_interest_rate=10,
-            tenure_months=12
+            principal=100000, annual_interest_rate=10, tenure_months=12
         )
 
         # EMI should be high due to short tenure
@@ -205,16 +193,12 @@ class TestDecisionEngine(unittest.TestCase):
     def test_calculate_emi_long_tenure(self):
         """Test EMI calculation with long tenure (60 months)."""
         emi = DecisionEngine.calculate_emi(
-            principal=1000000,
-            annual_interest_rate=12,
-            tenure_months=60
+            principal=1000000, annual_interest_rate=12, tenure_months=60
         )
 
         # EMI should be lower than 48 month tenure
         emi_48_months = DecisionEngine.calculate_emi(
-            principal=1000000,
-            annual_interest_rate=12,
-            tenure_months=48
+            principal=1000000, annual_interest_rate=12, tenure_months=48
         )
 
         assert emi < emi_48_months
@@ -222,13 +206,11 @@ class TestDecisionEngine(unittest.TestCase):
     def test_calculate_emi_rounding(self):
         """Test that EMI is rounded to 2 decimal places."""
         emi = DecisionEngine.calculate_emi(
-            principal=123456,
-            annual_interest_rate=11.5,
-            tenure_months=37
+            principal=123456, annual_interest_rate=11.5, tenure_months=37
         )
 
         # Check that result has at most 2 decimal places
-        assert len(str(emi).split('.')[-1]) <= 2
+        assert len(str(emi).split(".")[-1]) <= 2
 
     def test_decision_engine_constants(self):
         """Test that decision engine constants are set correctly."""
@@ -237,5 +219,3 @@ class TestDecisionEngine(unittest.TestCase):
         assert DecisionEngine.STATUS_PRE_APPROVED == "PRE_APPROVED"
         assert DecisionEngine.STATUS_REJECTED == "REJECTED"
         assert DecisionEngine.STATUS_MANUAL_REVIEW == "MANUAL_REVIEW"
-
-

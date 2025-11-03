@@ -11,7 +11,7 @@ from ..app.schemas import (
     ApplicationStatusResponse,
     LoanType,
     ApplicationStatus,
-    ErrorResponse
+    ErrorResponse,
 )
 
 
@@ -31,7 +31,7 @@ class TestApplicationCreate(unittest.TestCase):
             applicant_name=self.VALID_NAME,
             monthly_income_inr=self.VALID_INCOME,
             loan_amount_inr=self.VALID_LOAN_AMOUNT,
-            loan_type=self.VALID_LOAN_TYPE
+            loan_type=self.VALID_LOAN_TYPE,
         )
 
         assert app.pan_number == self.VALID_PAN
@@ -46,7 +46,7 @@ class TestApplicationCreate(unittest.TestCase):
             pan_number=self.VALID_PAN,
             monthly_income_inr=self.VALID_INCOME,
             loan_amount_inr=self.VALID_LOAN_AMOUNT,
-            loan_type=self.VALID_LOAN_TYPE
+            loan_type=self.VALID_LOAN_TYPE,
         )
 
         assert app.applicant_name is None
@@ -58,7 +58,7 @@ class TestApplicationCreate(unittest.TestCase):
             pan_number="ABCDE1234F",
             monthly_income_inr=self.VALID_INCOME,
             loan_amount_inr=self.VALID_LOAN_AMOUNT,
-            loan_type=self.VALID_LOAN_TYPE
+            loan_type=self.VALID_LOAN_TYPE,
         )
         assert app.pan_number == "ABCDE1234F"
 
@@ -68,7 +68,7 @@ class TestApplicationCreate(unittest.TestCase):
             pan_number="abcde1234f",
             monthly_income_inr=self.VALID_INCOME,
             loan_amount_inr=self.VALID_LOAN_AMOUNT,
-            loan_type=self.VALID_LOAN_TYPE
+            loan_type=self.VALID_LOAN_TYPE,
         )
         assert app.pan_number == "ABCDE1234F"
 
@@ -79,7 +79,7 @@ class TestApplicationCreate(unittest.TestCase):
             pan_number="abCDe1234f",
             monthly_income_inr=self.VALID_INCOME,
             loan_amount_inr=self.VALID_LOAN_AMOUNT,
-            loan_type=self.VALID_LOAN_TYPE
+            loan_type=self.VALID_LOAN_TYPE,
         )
         assert app.pan_number == "ABCDE1234F"
 
@@ -90,7 +90,7 @@ class TestApplicationCreate(unittest.TestCase):
                 pan_number="ABCD123F",  # Too short
                 monthly_income_inr=self.VALID_INCOME,
                 loan_amount_inr=self.VALID_LOAN_AMOUNT,
-                loan_type=self.VALID_LOAN_TYPE
+                loan_type=self.VALID_LOAN_TYPE,
             )
         assert "String should have at least 10 characters" in str(exc_info.value)
 
@@ -101,7 +101,7 @@ class TestApplicationCreate(unittest.TestCase):
                 pan_number="ABCDE12345F",  # Too long
                 monthly_income_inr=self.VALID_INCOME,
                 loan_amount_inr=self.VALID_LOAN_AMOUNT,
-                loan_type=self.VALID_LOAN_TYPE
+                loan_type=self.VALID_LOAN_TYPE,
             )
         assert "String should have at most 10 characters" in str(exc_info.value)
 
@@ -112,7 +112,7 @@ class TestApplicationCreate(unittest.TestCase):
                 pan_number="ABCDEFGHIJ",
                 monthly_income_inr=self.VALID_INCOME,
                 loan_amount_inr=self.VALID_LOAN_AMOUNT,
-                loan_type=self.VALID_LOAN_TYPE
+                loan_type=self.VALID_LOAN_TYPE,
             )
         assert "Invalid PAN format" in str(exc_info.value)
 
@@ -123,7 +123,7 @@ class TestApplicationCreate(unittest.TestCase):
                 pan_number="1234567890",
                 monthly_income_inr=self.VALID_INCOME,
                 loan_amount_inr=self.VALID_LOAN_AMOUNT,
-                loan_type=self.VALID_LOAN_TYPE
+                loan_type=self.VALID_LOAN_TYPE,
             )
         assert "Invalid PAN format" in str(exc_info.value)
 
@@ -134,7 +134,7 @@ class TestApplicationCreate(unittest.TestCase):
                 pan_number="ABCD@1234F",
                 monthly_income_inr=self.VALID_INCOME,
                 loan_amount_inr=self.VALID_LOAN_AMOUNT,
-                loan_type=self.VALID_LOAN_TYPE
+                loan_type=self.VALID_LOAN_TYPE,
             )
         assert "Invalid PAN format" in str(exc_info.value)
 
@@ -145,7 +145,7 @@ class TestApplicationCreate(unittest.TestCase):
                 pan_number="1BCDE1234F",  # Digit in first position
                 monthly_income_inr=self.VALID_INCOME,
                 loan_amount_inr=self.VALID_LOAN_AMOUNT,
-                loan_type=self.VALID_LOAN_TYPE
+                loan_type=self.VALID_LOAN_TYPE,
             )
         assert "Invalid PAN format" in str(exc_info.value)
 
@@ -157,7 +157,7 @@ class TestApplicationCreate(unittest.TestCase):
             applicant_name="John Doe",
             monthly_income_inr=self.VALID_INCOME,
             loan_amount_inr=self.VALID_LOAN_AMOUNT,
-            loan_type=self.VALID_LOAN_TYPE
+            loan_type=self.VALID_LOAN_TYPE,
         )
         assert app.applicant_name == "John Doe"
 
@@ -168,7 +168,7 @@ class TestApplicationCreate(unittest.TestCase):
             applicant_name="Dr. John A. Doe",
             monthly_income_inr=self.VALID_INCOME,
             loan_amount_inr=self.VALID_LOAN_AMOUNT,
-            loan_type=self.VALID_LOAN_TYPE
+            loan_type=self.VALID_LOAN_TYPE,
         )
         assert app.applicant_name == "Dr. John A. Doe"
 
@@ -179,7 +179,7 @@ class TestApplicationCreate(unittest.TestCase):
             applicant_name="  John Doe  ",
             monthly_income_inr=self.VALID_INCOME,
             loan_amount_inr=self.VALID_LOAN_AMOUNT,
-            loan_type=self.VALID_LOAN_TYPE
+            loan_type=self.VALID_LOAN_TYPE,
         )
         assert app.applicant_name == "John Doe"
 
@@ -190,7 +190,7 @@ class TestApplicationCreate(unittest.TestCase):
             applicant_name="AB",
             monthly_income_inr=self.VALID_INCOME,
             loan_amount_inr=self.VALID_LOAN_AMOUNT,
-            loan_type=self.VALID_LOAN_TYPE
+            loan_type=self.VALID_LOAN_TYPE,
         )
         assert app.applicant_name == "AB"
 
@@ -202,7 +202,7 @@ class TestApplicationCreate(unittest.TestCase):
                 applicant_name="A",
                 monthly_income_inr=self.VALID_INCOME,
                 loan_amount_inr=self.VALID_LOAN_AMOUNT,
-                loan_type=self.VALID_LOAN_TYPE
+                loan_type=self.VALID_LOAN_TYPE,
             )
         assert "Name must be at least 2 characters" in str(exc_info.value)
 
@@ -214,7 +214,7 @@ class TestApplicationCreate(unittest.TestCase):
                 applicant_name="John123",
                 monthly_income_inr=self.VALID_INCOME,
                 loan_amount_inr=self.VALID_LOAN_AMOUNT,
-                loan_type=self.VALID_LOAN_TYPE
+                loan_type=self.VALID_LOAN_TYPE,
             )
         assert "Name can only contain letters, spaces, and dots" in str(exc_info.value)
 
@@ -226,7 +226,7 @@ class TestApplicationCreate(unittest.TestCase):
                 applicant_name="John@Doe",
                 monthly_income_inr=self.VALID_INCOME,
                 loan_amount_inr=self.VALID_LOAN_AMOUNT,
-                loan_type=self.VALID_LOAN_TYPE
+                loan_type=self.VALID_LOAN_TYPE,
             )
         assert "Name can only contain letters, spaces, and dots" in str(exc_info.value)
 
@@ -237,7 +237,7 @@ class TestApplicationCreate(unittest.TestCase):
             pan_number=self.VALID_PAN,
             monthly_income_inr=Decimal("50000"),
             loan_amount_inr=self.VALID_LOAN_AMOUNT,
-            loan_type=self.VALID_LOAN_TYPE
+            loan_type=self.VALID_LOAN_TYPE,
         )
         assert app.monthly_income_inr == Decimal("50000")
 
@@ -247,7 +247,7 @@ class TestApplicationCreate(unittest.TestCase):
             pan_number=self.VALID_PAN,
             monthly_income_inr=Decimal("5000"),
             loan_amount_inr=self.VALID_LOAN_AMOUNT,
-            loan_type=self.VALID_LOAN_TYPE
+            loan_type=self.VALID_LOAN_TYPE,
         )
         assert app.monthly_income_inr == Decimal("5000")
 
@@ -258,7 +258,7 @@ class TestApplicationCreate(unittest.TestCase):
                 pan_number=self.VALID_PAN,
                 monthly_income_inr=Decimal("4999"),
                 loan_amount_inr=self.VALID_LOAN_AMOUNT,
-                loan_type=self.VALID_LOAN_TYPE
+                loan_type=self.VALID_LOAN_TYPE,
             )
         assert "Monthly income must be at least INR 5,000" in str(exc_info.value)
 
@@ -269,7 +269,7 @@ class TestApplicationCreate(unittest.TestCase):
                 pan_number=self.VALID_PAN,
                 monthly_income_inr=Decimal("0"),
                 loan_amount_inr=self.VALID_LOAN_AMOUNT,
-                loan_type=self.VALID_LOAN_TYPE
+                loan_type=self.VALID_LOAN_TYPE,
             )
         assert "greater than 0" in str(exc_info.value).lower()
 
@@ -280,7 +280,7 @@ class TestApplicationCreate(unittest.TestCase):
                 pan_number=self.VALID_PAN,
                 monthly_income_inr=Decimal("-1000"),
                 loan_amount_inr=self.VALID_LOAN_AMOUNT,
-                loan_type=self.VALID_LOAN_TYPE
+                loan_type=self.VALID_LOAN_TYPE,
             )
         assert "greater than 0" in str(exc_info.value).lower()
 
@@ -290,7 +290,7 @@ class TestApplicationCreate(unittest.TestCase):
             pan_number=self.VALID_PAN,
             monthly_income_inr=Decimal("10000000"),
             loan_amount_inr=self.VALID_LOAN_AMOUNT,
-            loan_type=self.VALID_LOAN_TYPE
+            loan_type=self.VALID_LOAN_TYPE,
         )
         assert app.monthly_income_inr == Decimal("10000000")
 
@@ -301,7 +301,7 @@ class TestApplicationCreate(unittest.TestCase):
                 pan_number=self.VALID_PAN,
                 monthly_income_inr=Decimal("10000001"),
                 loan_amount_inr=self.VALID_LOAN_AMOUNT,
-                loan_type=self.VALID_LOAN_TYPE
+                loan_type=self.VALID_LOAN_TYPE,
             )
         assert "unreasonably high" in str(exc_info.value).lower()
 
@@ -312,7 +312,7 @@ class TestApplicationCreate(unittest.TestCase):
             pan_number=self.VALID_PAN,
             monthly_income_inr=self.VALID_INCOME,
             loan_amount_inr=Decimal("500000"),
-            loan_type=self.VALID_LOAN_TYPE
+            loan_type=self.VALID_LOAN_TYPE,
         )
         assert app.loan_amount_inr == Decimal("500000")
 
@@ -322,7 +322,7 @@ class TestApplicationCreate(unittest.TestCase):
             pan_number=self.VALID_PAN,
             monthly_income_inr=self.VALID_INCOME,
             loan_amount_inr=Decimal("10000"),
-            loan_type=self.VALID_LOAN_TYPE
+            loan_type=self.VALID_LOAN_TYPE,
         )
         assert app.loan_amount_inr == Decimal("10000")
 
@@ -333,7 +333,7 @@ class TestApplicationCreate(unittest.TestCase):
                 pan_number=self.VALID_PAN,
                 monthly_income_inr=self.VALID_INCOME,
                 loan_amount_inr=Decimal("9999"),
-                loan_type=self.VALID_LOAN_TYPE
+                loan_type=self.VALID_LOAN_TYPE,
             )
         assert "Loan amount must be at least INR 10,000" in str(exc_info.value)
 
@@ -343,7 +343,7 @@ class TestApplicationCreate(unittest.TestCase):
             pan_number=self.VALID_PAN,
             monthly_income_inr=self.VALID_INCOME,
             loan_amount_inr=Decimal("10000000"),
-            loan_type=self.VALID_LOAN_TYPE
+            loan_type=self.VALID_LOAN_TYPE,
         )
         assert app.loan_amount_inr == Decimal("10000000")
 
@@ -354,7 +354,7 @@ class TestApplicationCreate(unittest.TestCase):
                 pan_number=self.VALID_PAN,
                 monthly_income_inr=self.VALID_INCOME,
                 loan_amount_inr=Decimal("10000001"),
-                loan_type=self.VALID_LOAN_TYPE
+                loan_type=self.VALID_LOAN_TYPE,
             )
         assert "less than or equal to" in str(exc_info.value).lower()
 
@@ -365,7 +365,7 @@ class TestApplicationCreate(unittest.TestCase):
                 pan_number=self.VALID_PAN,
                 monthly_income_inr=self.VALID_INCOME,
                 loan_amount_inr=Decimal("0"),
-                loan_type=self.VALID_LOAN_TYPE
+                loan_type=self.VALID_LOAN_TYPE,
             )
         assert "greater than 0" in str(exc_info.value).lower()
 
@@ -376,7 +376,7 @@ class TestApplicationCreate(unittest.TestCase):
             pan_number=self.VALID_PAN,
             monthly_income_inr=self.VALID_INCOME,
             loan_amount_inr=self.VALID_LOAN_AMOUNT,
-            loan_type=LoanType.PERSONAL
+            loan_type=LoanType.PERSONAL,
         )
         assert app.loan_type == LoanType.PERSONAL
 
@@ -386,7 +386,7 @@ class TestApplicationCreate(unittest.TestCase):
             pan_number=self.VALID_PAN,
             monthly_income_inr=self.VALID_INCOME,
             loan_amount_inr=self.VALID_LOAN_AMOUNT,
-            loan_type=LoanType.HOME
+            loan_type=LoanType.HOME,
         )
         assert app.loan_type == LoanType.HOME
 
@@ -396,7 +396,7 @@ class TestApplicationCreate(unittest.TestCase):
             pan_number=self.VALID_PAN,
             monthly_income_inr=self.VALID_INCOME,
             loan_amount_inr=self.VALID_LOAN_AMOUNT,
-            loan_type=LoanType.AUTO
+            loan_type=LoanType.AUTO,
         )
         assert app.loan_type == LoanType.AUTO
 
@@ -406,7 +406,7 @@ class TestApplicationCreate(unittest.TestCase):
             pan_number=self.VALID_PAN,
             monthly_income_inr=self.VALID_INCOME,
             loan_amount_inr=self.VALID_LOAN_AMOUNT,
-            loan_type="PERSONAL"
+            loan_type="PERSONAL",
         )
         assert app.loan_type == LoanType.PERSONAL
 
@@ -417,7 +417,7 @@ class TestApplicationCreate(unittest.TestCase):
                 pan_number=self.VALID_PAN,
                 monthly_income_inr=self.VALID_INCOME,
                 loan_amount_inr=self.VALID_LOAN_AMOUNT,
-                loan_type="INVALID"
+                loan_type="INVALID",
             )
         assert "Input should be" in str(exc_info.value)
 
@@ -429,8 +429,7 @@ class TestApplicationResponse:
         """Test creating application response."""
         app_id = UUID("123e4567-e89b-12d3-a456-426614174000")
         response = ApplicationResponse(
-            application_id=app_id,
-            status=ApplicationStatus.PENDING
+            application_id=app_id, status=ApplicationStatus.PENDING
         )
 
         assert response.application_id == app_id
@@ -441,10 +440,7 @@ class TestApplicationResponse:
         app_id = UUID("123e4567-e89b-12d3-a456-426614174000")
 
         for status in ApplicationStatus:
-            response = ApplicationResponse(
-                application_id=app_id,
-                status=status
-            )
+            response = ApplicationResponse(application_id=app_id, status=status)
             assert response.status == status
 
 
@@ -461,7 +457,7 @@ class TestApplicationStatusResponse:
             status=ApplicationStatus.PRE_APPROVED,
             cibil_score=750,
             created_at=now,
-            updated_at=now
+            updated_at=now,
         )
 
         assert response.application_id == app_id
@@ -479,7 +475,7 @@ class TestApplicationStatusResponse:
             application_id=app_id,
             status=ApplicationStatus.PENDING,
             created_at=now,
-            updated_at=now
+            updated_at=now,
         )
 
         assert response.cibil_score is None
@@ -491,8 +487,7 @@ class TestErrorResponse:
     def test_create_error_response_with_code(self):
         """Test creating error response with error code."""
         error = ErrorResponse(
-            detail="Application not found",
-            error_code="APP_NOT_FOUND"
+            detail="Application not found", error_code="APP_NOT_FOUND"
         )
 
         assert error.detail == "Application not found"

@@ -1,0 +1,163 @@
+  ---
+  Quick Commands Reference
+
+  | Command                    | Description                      |
+  |----------------------------|----------------------------------|
+  | colima start               |
+  | docker-compose up -d       | Start all services in background |
+  | docker-compose ps          | Check service status             |
+  | docker-compose logs -f     | View all logs                    |
+  | docker-compose logs -f api | View API service logs            |
+  | docker-compose stop        | Stop all services                |
+  | docker-compose down        | Stop and remove containers       |
+  | docker-compose restart api | Restart API service              |
+  | make test                  | Run all tests                    |
+  | make lint                  | Run linter                       |
+  | make format                | Format code                      |
+  |_______________________________________________________________|
+
+
+ # Verify Docker is installed and running
+  docker --version
+  docker-compose --version
+
+1. colima start
+
+    # Start all services (PostgreSQL, Kafka, Zookeeper, API, Credit, Decision services)
+2.  docker-compose up -d
+
+      What this does:
+      - Starts PostgreSQL database on port 5432
+      - Starts Zookeeper on port 2181
+      - Starts Kafka on ports 9092 and 29092
+      - Starts Kafka UI on port 8080
+      - Starts API service on port 8000
+      - Starts Credit and Decision microservices
+
+  Step 3: Verify Services are Running
+
+      # Check all containers status
+      docker-compose ps
+
+      # View logs from all services
+      docker-compose logs -f
+
+      To view specific service logs:
+      # API service logs
+      docker-compose logs -f api
+
+      # Credit service logs
+      docker-compose logs -f credit
+
+      # Decision service logs
+      docker-compose logs -f decision
+
+      # Database logs
+      docker-compose logs -f postgres
+
+      # Kafka logs
+      docker-compose logs -f kafka
+
+  ---
+  Step 4: Verify API is Running
+
+  curl http://localhost:8000/
+
+  # View API documentation
+  open http://localhost:8000/docs
+
+  ---
+  Step 5: Test the Application
+
+  Submit a loan application:
+  curl -X POST http://localhost:8000/applications \
+    -H "Content-Type: application/json" \
+    -d '{
+      "pan_number": "ABCDE1234F",
+      "applicant_name": "Rajesh Kumar",
+      "monthly_income_inr": 50000,
+      "loan_amount_inr": 200000,
+      "loan_type": "PERSONAL"
+    }'
+
+  Check application status (wait 5 seconds after submission):
+  # Replace {application_id} with the ID returned from POST request
+  curl http://localhost:8000/applications/{application_id}/status
+
+  ---
+  Step 6: Monitor Services (Optional)
+
+  Kafka UI:
+  # Open Kafka monitoring UI
+  open http://localhost:8080
+
+  Database Access:
+  # Connect to PostgreSQL
+  docker-compose exec postgres psql -U postgres -d loan_prequal
+
+  # View all applications
+  SELECT * FROM applications ORDER BY created_at DESC LIMIT 10;
+
+  # View applications by status
+  SELECT status, COUNT(*) FROM applications GROUP BY status;
+
+  # Exit postgres
+  \q
+
+  ---
+  Step 7: Running Tests (Optional)
+
+  # Run all tests
+  make test
+
+  # Or manually run pytest
+  pytest -v --maxfail=1 --disable-warnings
+
+  ---
+  Step 8: Stop Services
+
+  # Stop all services (keeps data)
+  docker-compose stop
+
+  # Stop and remove containers (keeps volumes)
+  docker-compose down
+
+  # Stop and remove everything including volumes (clean slate)
+  docker-compose down -v
+
+  ---
+  Step 9: Restart Services
+
+  # Restart all services
+  docker-compose restart
+
+  # Restart specific service
+  docker-compose restart api
+
+  ---
+  Troubleshooting
+
+  If ports are already in use:
+  # Check what's using port 8000
+  lsof -i :8000
+
+  # Kill the process or change port in docker-compose.yml
+
+  If services fail to start:
+  # Clean restart
+  docker-compose down -v
+  docker-compose up -d
+
+  # Rebuild containers
+  docker-compose build --no-cache
+  docker-compose up -d
+
+  Check service health:
+  # Database
+  docker-compose exec postgres pg_isready -U postgres
+
+  # API
+  curl http://localhost:8000/
+
+  # All services
+  docker-compose ps
